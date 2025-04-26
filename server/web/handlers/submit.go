@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"unicode/utf8"
 
 	"libremc.net/bandscrape/server/database"
 )
@@ -38,11 +39,11 @@ func (h *SubmitHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, track := range tracks {
 		if track.TrackID < 1 ||
 			track.TrackID > 4294967296 ||
-			len(track.TrackTitle) < 1 ||
-			len(track.TrackTitle) > 300 ||
-			len(track.AlbumTitle) > 300 ||
-			len(track.BandName) < 1 ||
-			len(track.BandName) > 100 ||
+			len(track.TrackTitle) == 0 ||
+			utf8.RuneCountInString(track.TrackTitle) > 300 ||
+			utf8.RuneCountInString(track.AlbumTitle) > 300 ||
+			len(track.BandName) == 0 ||
+			utf8.RuneCountInString(track.BandName) > 100 ||
 			!h.regex.MatchString(track.TrackURL) {
 			log.Println("Received invalid track in submission:", track)
 			http.Error(w, "Sanity check failed!", http.StatusBadRequest)
