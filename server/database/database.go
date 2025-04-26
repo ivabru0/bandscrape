@@ -43,7 +43,7 @@ func NewDatabase(dataDir string) (*Database, error) {
 		return nil, fmt.Errorf("stat file: %w", err)
 	}
 
-	db, err := sql.Open("sqlite3", dbFile+"?_journal_mode=WAL")
+	db, err := sql.Open("sqlite3", dbFile)
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}
