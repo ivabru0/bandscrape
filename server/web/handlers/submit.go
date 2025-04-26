@@ -61,7 +61,7 @@ func (h *SubmitHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // NewSubmitHandler initializes and returns a new [SubmitHandler].
 func NewSubmitHandler(db *database.Database) (*SubmitHandler, error) {
-	regex, err := regexp.Compile(`^https://[a-z0-9-]{1,63}\.bandcamp\.com/track/[a-z0-9_-]{1,300}$`)
+	regex, err := regexp.Compile(`^https://.+/track/[a-z0-9_-]{1,300}$`)
 	if err != nil {
 		return nil, fmt.Errorf("compile regex: %w", err)
 	}
