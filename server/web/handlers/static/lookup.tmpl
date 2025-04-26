@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BandScrape Lookup</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #333333;
+            color: #cccccc;
+        }
+
+        fieldset {
+            width: fit-content;
+            padding-bottom: 0;
+            margin-bottom: 1em;
+        }
+
+        label {
+            margin-right: 1em;
+        }
+
+        input {
+            margin-bottom: 1em;
+            padding: 0.25em;
+
+            background-color: #222222;
+            color: #dddddd;
+            border: 1px solid;
+        }
+        
+        input[type=submit] {
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #111111;
+        }
+
+        th, td {
+            padding: 0.25em;
+            padding-right: 2em;
+
+            text-align: left;
+            border: 1px solid;
+        }
+
+        tr:nth-child(even) {
+            background-color: #222222;
+        }
+
+        a {
+            color: lightblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>BandScrape Lookup</h1>
+    <p>
+        You can fill out all of these, or just one, or anything in between.
+        But one is the minimum.
+        All fields are very exact and <b>case-sensitive</b>!
+    </p>
+    <p>
+        If this has helped you, <i>please</i> share and link directly to the site (not this page, so the nag displays).
+    </p>
+    <form method="post">
+        <fieldset>
+            <legend>Fields</legend>
+            <label for="track_title">Track title</label>
+            <input type="text" name="track_title" id="track_title" />
+
+            <br>
+
+            <label for="album_title">Album title</label>
+            <input type="text" name="album_title" id="album_title" />
+
+            <br>
+
+            <label for="band_name">Band name</label>
+            <input type="text" name="band_name" id="band_name" />
+
+            <br>
+
+            <label for="track_url">Track URL</label>
+            <input type="text" name="track_url" id="track_url" />
+        </fieldset>
+
+        <input type="submit" value="Look up!" />
+    </form>
+
+    <hr>
+
+    <h1>Lookup Results ({{len .}})</h1>
+    {{if not .}}
+        <p>Ain't nobody here but us chickens!</p>
+    {{else}}
+        <table>
+            <tr>
+                <th>Track ID</th>
+                <th>Track Title</th>
+                <th>Album Title</th>
+                <th>Band Name</th>
+                <th>Track URL</th>
+                <th>Created</th>
+            <tr>
+            {{range .}}
+                <tr>
+                    <td>{{.TrackID}}</td>
+                    <td>{{.TrackTitle}}</td>
+                    <td>{{.AlbumTitle}}</td>
+                    <td>{{.BandName}}</td>
+                    <td><a href="{{.TrackURL}}">{{.TrackURL}}</a></td>
+                    <td>{{.Created}}</td>
+                </tr>
+            {{end}}
+        </table>
+    {{end}}
+</body>
+</html>
