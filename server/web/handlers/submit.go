@@ -40,7 +40,6 @@ func (h *SubmitHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			track.TrackID > 4294967296 ||
 			len(track.TrackTitle) < 1 ||
 			len(track.TrackTitle) > 300 ||
-			len(track.AlbumTitle) < 1 ||
 			len(track.AlbumTitle) > 300 ||
 			len(track.BandName) < 1 ||
 			len(track.BandName) > 100 ||
