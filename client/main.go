@@ -70,8 +70,8 @@ func submitTracks(tracks []Track) error {
 			strings.ReplaceAll(
 				strings.ReplaceAll(
 					strings.ReplaceAll(
-						"LttpCSS127D0D0D1C8585Ssubmit", "L", "h",
-						//"LttpsCSSbsDlibremcDnetSsubmit", "L", "h",
+						//"LttpCSS127D0D0D1C8585Ssubmit", "L", "h",
+						"LttpsCSSbsDlibremcDnetSsubmit", "L", "h",
 					), "C", ":",
 				), "S", "/",
 			), "D", ".",
