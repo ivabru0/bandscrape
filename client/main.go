@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -47,21 +48,43 @@ func submitTracks(tracks []Track) error {
 		return fmt.Errorf("encode request JSON: %w", err)
 	}
 
+	var compRequestJSON bytes.Buffer
+
+	gzipWriter, err := gzip.NewWriterLevel(&compRequestJSON, gzip.BestCompression)
+	if err != nil {
+		return fmt.Errorf("create gzip writer: %w", err)
+	}
+
+	if _, err := gzipWriter.Write(requestJSON); err != nil {
+		return fmt.Errorf("compress request JSON: %w", err)
+	}
+
+	if err := gzipWriter.Close(); err != nil {
+		return fmt.Errorf("close gzip writer: %w", err)
+	}
+
 	// Evading AV false-positives (unknown URLs embedded in executable)
-	response, err := http.Post(
+	request, err := http.NewRequest(
+		http.MethodPost,
 		strings.ReplaceAll(
 			strings.ReplaceAll(
 				strings.ReplaceAll(
 					strings.ReplaceAll(
-						//"LttpCSS127D0D0D1C8585Ssubmit", "L", "h",
-						"LttpsCSSbsDlibremcDnetSsubmit", "L", "h",
+						"LttpCSS127D0D0D1C8585Ssubmit", "L", "h",
+						//"LttpsCSSbsDlibremcDnetSsubmit", "L", "h",
 					), "C", ":",
 				), "S", "/",
 			), "D", ".",
 		),
-		"application/json",
-		bytes.NewReader(requestJSON),
+		&compRequestJSON,
 	)
+	if err != nil {
+		return fmt.Errorf("create POST request: %w", err)
+	}
+
+	request.Header.Set("Content-Encoding", "gzip")
+
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return fmt.Errorf("send POST request: %w", err)
 	}
@@ -71,10 +94,9 @@ func submitTracks(tracks []Track) error {
 	if err != nil {
 		return fmt.Errorf("read response body: %w", err)
 	}
-	bodyFmt := strings.TrimSpace(string(body))
 
 	if response.StatusCode != http.StatusCreated {
-		return fmt.Errorf("non-201 response code: %s", bodyFmt)
+		return fmt.Errorf("non-201 response code: %s", strings.TrimSpace(string(body)))
 	}
 
 	return nil
@@ -82,18 +104,18 @@ func submitTracks(tracks []Track) error {
 
 func getTrack(id int) (*Track, error) {
 	backoff := 1
-	for {
-		requestJSON, err := json.Marshal(
-			BandcampRequestJSON{
-				TralbumType: "t",
-				BandID:      1,
-				TralbumID:   id,
-			},
-		)
-		if err != nil {
-			return nil, fmt.Errorf("encode request JSON: %w", err)
-		}
+	requestJSON, err := json.Marshal(
+		BandcampRequestJSON{
+			TralbumType: "t",
+			BandID:      1,
+			TralbumID:   id,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("encode request JSON: %w", err)
+	}
 
+	for {
 		response, err := http.Post(
 			"https://bandcamp.com/api/mobile/8/tralbum_details",
 			"application/json",

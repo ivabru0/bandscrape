@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -25,14 +26,26 @@ func (h *SubmitHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if r.Header.Get("Content-Encoding") != "gzip" {
+		http.Error(w, "Content must be gzip-encoded", http.StatusBadRequest)
+		return
+	}
+
+	gzipReader, err := gzip.NewReader(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to create gzip reader: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer gzipReader.Close()
+
 	var tracks []database.Track
-	if err := json.NewDecoder(r.Body).Decode(&tracks); err != nil {
+	if err := json.NewDecoder(gzipReader).Decode(&tracks); err != nil {
 		http.Error(w, "Failed to decode JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if len(tracks) > 15 || len(tracks) < 1 {
-		http.Error(w, "Too many or too little tracks!", http.StatusBadRequest)
+	if len(tracks) < 1 {
+		http.Error(w, "Too little tracks!", http.StatusBadRequest)
 		return
 	}
 

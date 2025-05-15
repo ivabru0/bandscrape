@@ -60,9 +60,6 @@ func StartWeb(address string, db *database.Database) error {
 			5*time.Second,
 			"Timed out\n",
 		),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  10 * time.Second,
 	}
 
 	go shutdownOnInterrupt(server)
