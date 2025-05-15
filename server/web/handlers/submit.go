@@ -31,7 +31,7 @@ func (h *SubmitHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(tracks) > 100 || len(tracks) < 1 {
+	if len(tracks) > 15 || len(tracks) < 1 {
 		http.Error(w, "Too many or too little tracks!", http.StatusBadRequest)
 		return
 	}

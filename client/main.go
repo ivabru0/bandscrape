@@ -9,7 +9,6 @@ import (
 	"log"
 	"math/rand/v2"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -82,6 +81,7 @@ func submitTracks(tracks []Track) error {
 }
 
 func getTrack(id int) (*Track, error) {
+	backoff := 1
 	for {
 		requestJSON, err := json.Marshal(
 			BandcampRequestJSON{
@@ -95,7 +95,7 @@ func getTrack(id int) (*Track, error) {
 		}
 
 		response, err := http.Post(
-			"https://bandcamp.com/api/mobile/26/tralbum_details",
+			"https://bandcamp.com/api/mobile/8/tralbum_details",
 			"application/json",
 			bytes.NewBuffer(requestJSON),
 		)
@@ -105,13 +105,9 @@ func getTrack(id int) (*Track, error) {
 		defer response.Body.Close()
 
 		if response.StatusCode == http.StatusTooManyRequests {
-			retryAfter, err := strconv.Atoi(response.Header.Get("retry-after"))
-			if err != nil {
-				retryAfter = 3
-			}
-
-			log.Println(id, "- WAIT -", retryAfter, "s")
-			time.Sleep(time.Duration(retryAfter) * time.Second)
+			backoff = backoff * 2
+			log.Println(id, "- WAIT -", backoff, "s")
+			time.Sleep(time.Duration(backoff) * time.Second)
 			continue
 		}
 
@@ -145,7 +141,7 @@ func getTrack(id int) (*Track, error) {
 func main() {
 	for {
 		var tracks []Track
-		for range 100 {
+		for len(tracks) < 15 {
 			id := int(rand.Uint32())
 			startTime := time.Now()
 			track, err := getTrack(id)
